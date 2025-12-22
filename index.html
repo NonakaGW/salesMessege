@@ -1,206 +1,247 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>勤務状況メッセージ作成ツール</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 0 16px;
-      background: #f5f5f5;
-    }
-    h1 { font-size: 1.4rem; margin-bottom: 12px; }
-    .card {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-      margin-bottom: 16px;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 6px 4px; vertical-align: middle; }
-    th.name-col, td.name-col { width: 100px; white-space: nowrap; }
-    th { text-align: left; font-size: 0.9rem; }
-    .status-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 14px;
-      font-size: 0.9rem;
-    }
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      background: #2563eb;
-      color: #fff;
-    }
-    button.secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-    .buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    textarea {
-      width: 100%;
-      min-height: 140px;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-size: 0.9rem;
-      resize: vertical;
-    }
-    .copy-box {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
-    .copy-btn {
-      background: #10b981;
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
 
-<h1>勤務状況メッセージ作成ツール</h1>
+    <head>
+        <meta charset="UTF-8">
+        <title>勤務状況メッセージ作成ツール</title>
+        <style>
+            body {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                max-width: 800px;
+                margin: 20px auto;
+                padding: 0 16px;
+                background: #f5f5f5;
+            }
 
-<div class="card">
-  <p>各メンバーの勤務区分を選択して「作成」を押すと、貼り付け用メッセージを生成します。</p>
-</div>
+            h1 {
+                font-size: 1.4rem;
+                margin-bottom: 12px;
+            }
 
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th class="name-col">名前</th>
-        <th>勤務区分</th>
-      </tr>
-    </thead>
-    <tbody id="member-rows"></tbody>
-  </table>
+            .card {
+                background: #fff;
+                padding: 16px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+                margin-bottom: 16px;
+            }
 
-  <div class="buttons">
-    <button id="generateBtn">作成</button>
-    <button id="clearBtn" class="secondary">リセット</button>
-  </div>
-</div>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
 
-<div class="card">
-  <p>生成されたメッセージ：</p>
-  <textarea id="output"></textarea>
+            th,
+            td {
+                padding: 6px 4px;
+                vertical-align: middle;
+            }
 
-  <div class="copy-box">
-    <button class="copy-btn" id="copyBtn">コピー</button>
-  </div>
-</div>
+            th.name-col,
+            td.name-col {
+                width: 100px;
+                white-space: nowrap;
+            }
 
-<script>
-  // ★ 別チーム用メンバー（全員デフォ出社）
-  const members = [
-    "菅野",
-    "吉田(朱)",
-    "西山",
-    "日高",
-    "田村",
-    "鹿嶋",
-    "吉田(玲)",
-    "菊池",
-    "園部"
-  ].map(name => ({ name, default: "出社" }));
+            th {
+                text-align: left;
+                font-size: 0.9rem;
+            }
 
-  // ★ 勤務区分（全員共通）
-  const STATUSES = ["出社", "在宅", "休み", "午前休", "午後休", "その他"];
+            .status-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px 14px;
+                font-size: 0.9rem;
+            }
 
-  function buildRows() {
-    const tbody = document.getElementById("member-rows");
-    tbody.innerHTML = "";
+            button {
+                border: none;
+                border-radius: 999px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                background: #2563eb;
+                color: #fff;
+            }
 
-    members.forEach((member, index) => {
-      const tr = document.createElement("tr");
+            button.secondary {
+                background: #e5e7eb;
+                color: #111827;
+            }
 
-      const nameTd = document.createElement("td");
-      nameTd.className = "name-col";
-      nameTd.textContent = member.name;
-      tr.appendChild(nameTd);
+            .buttons {
+                display: flex;
+                gap: 8px;
+                margin-top: 12px;
+            }
 
-      const statusTd = document.createElement("td");
-      const group = document.createElement("div");
-      group.className = "status-group";
+            textarea {
+                width: 100%;
+                min-height: 140px;
+                padding: 8px;
+                border-radius: 6px;
+                border: 1px solid #d1d5db;
+                font-size: 0.9rem;
+                resize: vertical;
+            }
 
-      const groupName = "status-" + index;
+            .copy-box {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 8px;
+            }
 
-      STATUSES.forEach(status => {
-        const label = document.createElement("label");
-        const input = document.createElement("input");
+            .copy-btn {
+                background: #10b981;
+                color: #fff;
+                padding: 6px 14px;
+                border-radius: 999px;
+                font-size: 0.85rem;
+                cursor: pointer;
+            }
+        </style>
+    </head>
 
-        input.type = "radio";
-        input.name = groupName;
-        input.value = status;
-        if (member.default === status) input.checked = true;
+    <body>
 
-        label.appendChild(input);
-        label.append(" " + status);
-        group.appendChild(label);
-      });
+        <h1>勤務状況メッセージ作成ツール</h1>
 
-      statusTd.appendChild(group);
-      tr.appendChild(statusTd);
-      tbody.appendChild(tr);
-    });
-  }
+        <div class="card">
+            <p>各メンバーの勤務区分を選択して「作成」を押すと、貼り付け用メッセージを生成します。</p>
+        </div>
 
-  function generateMessage() {
-    const groups = {};
-    STATUSES.forEach(s => groups[s] = []);
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="name-col">名前</th>
+                        <th>勤務区分</th>
+                    </tr>
+                </thead>
+                <tbody id="member-rows"></tbody>
+            </table>
 
-    members.forEach((member, index) => {
-      document.getElementsByName("status-" + index).forEach(r => {
-        if (r.checked) groups[r.value].push(member.name);
-      });
-    });
+            <div class="buttons">
+                <button id="generateBtn">作成</button>
+                <button id="clearBtn" class="secondary">リセット</button>
+            </div>
+        </div>
 
-    let lines = [];
-    lines.push("おはようございます。");
-    lines.push("本日の勤務状況は下記のとおりです。");
-    lines.push("");
+        <div class="card">
+            <p>生成されたメッセージ：</p>
+            <textarea id="output"></textarea>
 
-    STATUSES.forEach(status => {
-      if (groups[status].length > 0) {
-        lines.push(`${status}：${groups[status].join("、")}`);
-      }
-    });
+            <div class="copy-box">
+                <button class="copy-btn" id="copyBtn">コピー</button>
+            </div>
+        </div>
 
-    document.getElementById("output").value = lines.join("\n");
-  }
+        <script>
+            // ★ 別チーム用メンバー（全員デフォ出社）
+            const members = [
+                "菅野",
+                "吉田(朱)",
+                "西山",
+                "日高",
+                "田村",
+                "鹿嶋",
+                "吉田(玲)",
+                "菊池",
+                "園部"
+            ].map(name => ({ name, default: "出社" }));
 
-  function clearAll() {
-    buildRows();
-    document.getElementById("output").value = "";
-  }
+            // ★ 勤務区分（全員共通）
+            const STATUSES = ["出社", "在宅", "休み", "午前休", "午後休", "その他"];
 
-  function copyToClipboard() {
-    navigator.clipboard.writeText(
-      document.getElementById("output").value
-    ).then(() => alert("コピーしました！"));
-  }
+            function buildRows() {
+                const tbody = document.getElementById("member-rows");
+                tbody.innerHTML = "";
 
-  buildRows();
-  document.getElementById("generateBtn").addEventListener("click", generateMessage);
-  document.getElementById("clearBtn").addEventListener("click", clearAll);
-  document.getElementById("copyBtn").addEventListener("click", copyToClipboard);
-</script>
+                members.forEach((member, index) => {
+                    const tr = document.createElement("tr");
 
-</body>
+                    const nameTd = document.createElement("td");
+                    nameTd.className = "name-col";
+                    nameTd.textContent = member.name;
+                    tr.appendChild(nameTd);
+
+                    const statusTd = document.createElement("td");
+                    const group = document.createElement("div");
+                    group.className = "status-group";
+
+                    const groupName = "status-" + index;
+
+                    STATUSES.forEach(status => {
+                        const label = document.createElement("label");
+                        const input = document.createElement("input");
+
+                        input.type = "radio";
+                        input.name = groupName;
+                        input.value = status;
+                        if (member.default === status) input.checked = true;
+
+                        label.appendChild(input);
+                        label.append(" " + status);
+                        group.appendChild(label);
+                    });
+
+                    statusTd.appendChild(group);
+                    tr.appendChild(statusTd);
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function generateMessage() {
+                const groups = {};
+                STATUSES.forEach(s => groups[s] = []);
+
+                members.forEach((member, index) => {
+                    document.getElementsByName("status-" + index).forEach(r => {
+                        if (r.checked) groups[r.value].push(member.name);
+                    });
+                });
+
+                let lines = [];
+                lines.push("おはようございます。");
+                lines.push("本日の勤務状況は下記のとおりです。");
+                lines.push("");
+
+                STATUSES.forEach(status => {
+                    // 午前休・午後休は該当者がいない場合は表示しない
+                    if ((status === "午前休" || status === "午後休") && groups[status].length === 0) {
+                        return;
+                    }
+
+                    const names = groups[status].length > 0
+                        ? groups[status].join("、")
+                        : "";
+
+                    lines.push(`${status}：${names}`);
+                });
+
+
+
+                document.getElementById("output").value = lines.join("\n");
+            }
+
+            function clearAll() {
+                buildRows();
+                document.getElementById("output").value = "";
+            }
+
+            function copyToClipboard() {
+                navigator.clipboard.writeText(
+                    document.getElementById("output").value
+                ).then(() => alert("コピーしました！"));
+            }
+
+            buildRows();
+            document.getElementById("generateBtn").addEventListener("click", generateMessage);
+            document.getElementById("clearBtn").addEventListener("click", clearAll);
+            document.getElementById("copyBtn").addEventListener("click", copyToClipboard);
+        </script>
+
+    </body>
+
 </html>
-
