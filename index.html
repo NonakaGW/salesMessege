@@ -226,16 +226,16 @@
     const lines = [
       "おはようございます。",
       "本日の教育部の勤務状況は下記のとおりです。",
-      " "
+      " ",
+      `出社：${result["出社"].join("、")}`,
+      `在宅：${result["在宅"].join("、")}`,
+      `休み：${result["休み"].join("、")}`
     ];
 
-    // 中身がある区分だけ出力（空なら行ごと出さない）
-    const order = ["出社", "在宅", "休み", "その他"];
-    order.forEach((key) => {
-      if (result[key].length > 0) {
-        lines.push(`${key}：${result[key].join("、")}`);
-      }
-    });
+    // 「その他」だけは該当者がいるときだけ出す
+    if (result["その他"].length > 0) {
+      lines.push(`その他：${result["その他"].join("、")}`);
+    }
 
     document.getElementById("output").value = lines.join("\n");
   }
@@ -258,6 +258,6 @@
   document.getElementById("copy").onclick = copyToClipboard;
 </script>
 
+
 </body>
 </html>
-
