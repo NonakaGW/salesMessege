@@ -140,12 +140,17 @@
         <td class="name-col">${m.name}</td>
         <td>
           <div class="group">
-            ${baseStatuses.map(b =>
-              `<label>
-                <input type="radio" name="base-${i}" value="${b}" ${b === m.default ? "checked" : ""}>
+            ${baseStatuses
+              .map(
+                (b) => `
+              <label>
+                <input type="radio" name="base-${i}" value="${b}" ${
+                  b === m.default ? "checked" : ""
+                }>
                 ${b}
               </label>`
-            ).join("")}
+              )
+              .join("")}
           </div>
         </td>
         <td>
@@ -161,7 +166,8 @@
       const am = tr.querySelector(`input[name="am-${i}"]`);
       const pm = tr.querySelector(`input[name="pm-${i}"]`);
 
-      baseRadios.forEach(radio => {
+      // ベースが休みなら午前休/午後休は無効化
+      baseRadios.forEach((radio) => {
         radio.addEventListener("change", () => {
           if (radio.checked && radio.value === "休み") {
             am.checked = false;
@@ -175,10 +181,16 @@
         });
       });
 
-      am.addEventListener("change", () => { if (am.checked) pm.checked = false; });
-      pm.addEventListener("change", () => { if (pm.checked) am.checked = false; });
+      // 午前休/午後休はどちらか片方のみ
+      am.addEventListener("change", () => {
+        if (am.checked) pm.checked = false;
+      });
+      pm.addEventListener("change", () => {
+        if (pm.checked) am.checked = false;
+      });
 
-      const initial = [...baseRadios].find(r => r.checked)?.value;
+      // 初期状態の反映
+      const initial = [...baseRadios].find((r) => r.checked)?.value;
       if (initial === "休み") {
         am.disabled = true;
         pm.disabled = true;
@@ -190,10 +202,14 @@
     const result = { 出社: [], 在宅: [], 休み: [], その他: [] };
 
     members.forEach((m, i) => {
-      const base = [...document.getElementsByName(`base-${i}`)].find(r => r.checked).value;
+      const base = [...document.getElementsByName(`base-${i}`)].find(
+        (r) => r.checked
+      ).value;
+
       const amOff = document.querySelector(`input[name="am-${i}"]`).checked;
       const pmOff = document.querySelector(`input[name="pm-${i}"]`).checked;
 
+      // amとpmが両方trueになることはUI上ないが、安全のため残す
       if (amOff && pmOff) {
         result["休み"].push(m.name);
       } else if (amOff) {
@@ -210,12 +226,16 @@
     const lines = [
       "おはようございます。",
       "本日の教育部の勤務状況は下記のとおりです。",
-      " ",
-      `出社：${result["出社"].join("、")}`,
-      `在宅：${result["在宅"].join("、")}`,
-      `休み：${result["休み"].join("、")}`,
-      `その他：${result["その他"].join("、")}`
+      " "
     ];
+
+    // 中身がある区分だけ出力（空なら行ごと出さない）
+    const order = ["出社", "在宅", "休み", "その他"];
+    order.forEach((key) => {
+      if (result[key].length > 0) {
+        lines.push(`${key}：${result[key].join("、")}`);
+      }
+    });
 
     document.getElementById("output").value = lines.join("\n");
   }
@@ -223,6 +243,7 @@
   function copyToClipboard() {
     const text = document.getElementById("output").value;
     if (!text) return;
+
     navigator.clipboard.writeText(text).then(() => {
       alert("コピーしました！");
     });
@@ -239,3 +260,4 @@
 
 </body>
 </html>
+
